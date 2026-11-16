@@ -1175,12 +1175,16 @@ document.addEventListener("click", e => {
   if (S.reports[id]) delete S.reports[id]; else S.reports[id] = Date.now();
   save(); b.textContent = S.reports[id] ? "신고함 (누르면 취소)" : "이 문제가 이상해요";
 });
+function qChips(q) {
+  return `<span class="chip">${q.ch}장</span><span class="chip mono">${esc(q.lo)}</span><span class="chip ${q.k === 3 ? "k3" : ""}">K${q.k}</span>${q.hard ? '<span class="chip hard">실전</span>' : ""}`;
+}
+// bare: 오답노트처럼 바깥 제목줄이 문제 본문과 칩을 이미 보여 줄 때
 function reviewCard(q, sel, perm, label, opts = {}) {
   const ok = same(sel, q.ans);
   const keyTxt = q.ans.map(a => LETTERS[perm.indexOf(a)]).join(", ");
   const verdict = opts.read ? "" : `<div class="verdict ${ok ? "ok" : "bad"}">${ok ? "맞힌 문제" : sel.length ? `틀린 문제 · 정답 ${keyTxt}` : `안 푼 문제 · 정답 ${keyTxt}`}</div>`;
   return `<article class="${opts.bare ? "" : "flat "}stack" style="margin-top:8px">
-    <div class="chips">${label ? `<span class="chip mono">${esc(label)}</span>` : ""}<span class="chip">${q.ch}장</span><span class="chip mono">${esc(q.lo)}</span><span class="chip ${q.k === 3 ? "k3" : ""}">K${q.k}</span>${q.hard ? '<span class="chip hard">실전</span>' : ""}</div>
+    ${opts.bare ? "" : `<div class="chips">${label ? `<span class="chip mono">${esc(label)}</span>` : ""}${qChips(q)}</div>`}
     ${opts.bare ? "" : `<div class="qtext">${fmt(q.q)}${q.ans.length === 2 ? ' <span class="pick2">(두 개를 고르시오)</span>' : ""}</div>`}
     ${q.table ? tableHtml(q.table) : ""}${q.code ? `<pre class="code">${esc(q.code)}</pre>` : ""}
     ${verdict}${gradedOpts(q, sel, perm)}
@@ -1233,7 +1237,7 @@ function vSummary(v) {
 let wrongCh = 0, wrongRead = false;
 function wrongItem(id) {
   const q = QBY[id];
-  return `<details class="list-q"><summary><div class="chips"><span class="chip">${q.ch}장</span><span class="chip mono">${esc(q.lo)}</span>${S.wrong[id] && S.wrong[id].st ? '<span class="chip ok">1번 맞힘</span>' : ""}</div><div class="t">${plain(q.q)}</div></summary>
+  return `<details class="list-q"><summary><div class="chips">${qChips(q)}${S.wrong[id] && S.wrong[id].st ? '<span class="chip ok">1번 맞힘</span>' : ""}</div><div class="t">${plain(q.q)}</div></summary>
     ${reviewCard(q, [], q.opts.map((_, i) => i), "", { read: true, bare: true })}</details>`;
 }
 function vWrong(v) {
